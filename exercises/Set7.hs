@@ -163,6 +163,14 @@ reverseNonEmpty (x :| xs) = let (y:ys) = reverse (x:xs)
 -- velocity (Distance 50 <> Distance 10) (Time 1 <> Time 2)
 --    ==> Velocity 20
 
+instance Semigroup (Distance) where
+    Distance a <> Distance b = Distance (a + b)
+
+instance Semigroup (Velocity) where
+    Velocity a <> Velocity b = Velocity (a + b)
+
+instance Semigroup (Time) where
+    Time a <> Time b = Time (a + b)
 
 ------------------------------------------------------------------------------
 -- Ex 7: implement a Monoid instance for the Set type from exercise 2.
