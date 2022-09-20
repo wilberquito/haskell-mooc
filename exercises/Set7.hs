@@ -67,8 +67,6 @@ add e (Set ys) = Set $ add' e ys
             | e == x = xxs 
             | otherwise = e:xxs
 
--- add = todo
-
 ------------------------------------------------------------------------------
 -- Ex 3: a state machine for baking a cake. The type Event represents
 -- things that can happen while baking a cake. The type State is meant
@@ -102,10 +100,28 @@ add e (Set ys) = Set $ add' e ys
 data Event = AddEggs | AddFlour | AddSugar | Mix | Bake
   deriving (Eq,Show)
 
-data State = Start | Error | Finished
+data State = Start | Error 
+            | Finished | WaittingForFlourOrSugar 
+            | WaittingForSugar | WaittingForFlour  
+            | WaittingForMix | WaittingForBake
   deriving (Eq,Show)
 
-step = todo
+step :: State -> Event -> State
+step Start AddEggs = WaittingForFlourOrSugar
+step Start _ = Error
+step WaittingForFlourOrSugar AddFlour = WaittingForSugar
+step WaittingForFlourOrSugar AddSugar = WaittingForFlour
+step WaittingForFlourOrSugar _ = Error
+step WaittingForSugar AddSugar = WaittingForMix
+step WaittingForSugar _ = Error
+step WaittingForFlour AddFlour = WaittingForMix
+step WaittingForFlour _ = Error
+step WaittingForMix Mix = WaittingForBake
+step WaittingForMix _ = Error
+step WaittingForBake Bake = Finished
+step WaittingForBake _ = Error
+step Finished _ = Finished
+step Error _ = Error
 
 -- do not edit this
 bake :: [Event] -> State
