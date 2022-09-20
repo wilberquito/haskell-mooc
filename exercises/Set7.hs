@@ -180,6 +180,12 @@ instance Semigroup (Time) where
 --
 -- What are the class constraints for the instances?
 
+instance Ord a => Semigroup (Set a) where 
+   Set xs <> Set [] = Set xs
+   Set xs <> Set (y:ys) = add y (Set xs) <> Set ys
+
+instance Ord a => Monoid (Set a) where
+    mempty = Set []
 
 ------------------------------------------------------------------------------
 -- Ex 8: below you'll find two different ways of representing
