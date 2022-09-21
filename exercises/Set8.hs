@@ -468,7 +468,18 @@ data Blur = Blur
   deriving Show
 
 instance Transform Blur where
-  apply = todo
+    apply Blur (Picture f) = Picture f'
+        where f' c@(Coord x y) = 
+                                let Color r1 g1 b1 = f (Coord (x - 1) y)
+                                    Color r2 g2 b2 = f (Coord (x + 1) y)
+                                    Color r3 g3 b3 = f (Coord x (y + 1))
+                                    Color r4 g4 b4 = f (Coord x (y - 1))
+                                    Color r5 g5 b5 = f c 
+                                    red = ((r1 + r2 + r3 + r4 + r5) `div` 5)
+                                    green = ((g1 + g2 + g3 + g4 + g5) `div` 5)
+                                    blue = ((b1 + b2 + b3 + b4 + b5) `div` 5)
+                                in Color red green blue
+
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
