@@ -397,19 +397,23 @@ xy = Picture f
 data Fill = Fill Color
 
 instance Transform Fill where
-  apply = todo
+  apply (Fill color) _ = Picture (\coor -> color)
 
 data Zoom = Zoom Int
   deriving Show
 
 instance Transform Zoom where
-  apply = todo
+  apply (Zoom n) p = zoom n p
 
 data Flip = FlipX | FlipY | FlipXY
   deriving Show
 
 instance Transform Flip where
-  apply = todo
+  apply FlipXY p = flipXY p
+  apply FlipX (Picture f) = Picture (f . (\(Coord x y) -> Coord (-x) y))
+  apply FlipY (Picture f) = Picture (f . (\(Coord x y) -> Coord x (-y)))
+
+
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
