@@ -174,7 +174,7 @@ blendColor (Color r1 g1 b1) (Color r2 g2 b2) = Color (favg r1 r2) (favg g1 g2) (
     where favg a b = (a + b) `div` 2
 
 combine :: (Color -> Color -> Color) -> Picture -> Picture -> Picture
-combine blend (Picture g) (Picture h) = Picture (\coord -> blend (g coord) (h coord))
+combine f (Picture g) (Picture h) = Picture (\coord -> f (g coord) (h coord))
 
 ------------------------------------------------------------------------------
 
@@ -235,7 +235,9 @@ exampleCircle = fill red (circle 80 100 200)
 --        ["000000","000000","000000","000000","000000","000000"]]
 
 rectangle :: Int -> Int -> Int -> Int -> Shape
-rectangle x0 y0 w h = todo
+rectangle x0 y0 w h = Shape f
+    where f (Coord x y) = x >= x0 && x < (w + x0) && y >= y0 && y < (h + y0)
+
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
