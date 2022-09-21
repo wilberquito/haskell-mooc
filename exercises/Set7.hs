@@ -300,17 +300,26 @@ passwordAllowed password (Or pr1 pr2) = passwordAllowed password pr1 || password
 --     ==> "(3*(1+1))"
 --
 
-data Arithmetic = Todo
+data Arithmetic = 
+    Literal Integer
+    | Add Arithmetic Arithmetic
+    | Multiply Arithmetic Arithmetic
   deriving Show
 
 literal :: Integer -> Arithmetic
-literal = todo
+literal n = Literal n
 
 operation :: String -> Arithmetic -> Arithmetic -> Arithmetic
-operation = todo
+operation "+" op1 op2 = Add op1 op2
+operation "*" op1 op2 = Multiply op1 op2
 
 evaluate :: Arithmetic -> Integer
-evaluate = todo
+evaluate (Literal n) = n
+evaluate (Add a b) = (evaluate a) + (evaluate b)
+evaluate (Multiply a b) = (evaluate a) * (evaluate b)
 
 render :: Arithmetic -> String
-render = todo
+render (Literal n) = show n
+render (Add a b) = "(" ++ render a ++ "+" ++ render b ++ ")"
+render (Multiply a b) = "(" ++ render a ++ "*" ++ render b ++ ")"
+
