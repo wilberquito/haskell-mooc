@@ -497,7 +497,9 @@ data BlurMany = BlurMany Int
   deriving Show
 
 instance Transform BlurMany where
-  apply = todo
+    apply (BlurMany 0) picture = picture
+    apply (BlurMany n) picture = apply (BlurMany (n - 1)) (apply Blur picture)
+
 ------------------------------------------------------------------------------
 
 -- Here's a blurred version of our original snowman. See it by running
