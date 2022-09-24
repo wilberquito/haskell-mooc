@@ -47,10 +47,10 @@ type Col   = Int
 type Coord = (Row, Col)
 
 nextRow :: Coord -> Coord
-nextRow (i,j) = todo
+nextRow (i,j) = (i + 1, 1)
 
 nextCol :: Coord -> Coord
-nextCol (i,j) = todo
+nextCol (i,j) = (i, j + 1)
 
 --------------------------------------------------------------------------------
 -- Ex 2: Implement the function prettyPrint that, given the size of
@@ -102,8 +102,25 @@ nextCol (i,j) = todo
 
 type Size = Int
 
+debugPrettyPrint :: Size -> [Coord] -> IO()
+debugPrettyPrint n coords = putStrLn $ prettyPrint n coords
+
 prettyPrint :: Size -> [Coord] -> String
-prettyPrint = todo
+prettyPrint n coords = makeRawPrint n [x | r <- [1..n], c <- [1..n], let x = f (r, c)]
+    where
+    f :: Coord -> Char
+    f coord = if elem coord coords then 'Q' else '.'
+
+    makeRawPrint :: Size -> String -> String
+    makeRawPrint n [] = []
+    makeRawPrint n txtMatrix =
+        let 
+            (left, right) = splitAt n txtMatrix
+        in left ++ "\n" ++ makeRawPrint n right
+
+-- takeWhileInclusive :: (a -> Bool) -> [a] -> [a]
+-- takeWhileInclusive _ [] = []
+-- takeWhileInclusive p (x:xs) = x : if p x then takeWhileInclusive p xs else []
 
 --------------------------------------------------------------------------------
 -- Ex 3: The task in this exercise is to define the relations sameRow, sameCol,
