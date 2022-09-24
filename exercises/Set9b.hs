@@ -106,21 +106,18 @@ debugPrettyPrint :: Size -> [Coord] -> IO()
 debugPrettyPrint n coords = putStrLn $ prettyPrint n coords
 
 prettyPrint :: Size -> [Coord] -> String
-prettyPrint n coords = makeRawPrint n [x | r <- [1..n], c <- [1..n], let x = f (r, c)]
+prettyPrint n coords = helper (1, 1) (sort coords)
     where
-    f :: Coord -> Char
-    f coord = if elem coord coords then 'Q' else '.'
-
-    makeRawPrint :: Size -> String -> String
-    makeRawPrint n [] = []
-    makeRawPrint n txtMatrix =
-        let 
-            (left, right) = splitAt n txtMatrix
-        in left ++ "\n" ++ makeRawPrint n right
-
--- takeWhileInclusive :: (a -> Bool) -> [a] -> [a]
--- takeWhileInclusive _ [] = []
--- takeWhileInclusive p (x:xs) = x : if p x then takeWhileInclusive p xs else []
+        helper :: Coord -> [Coord] -> String
+        helper (x, y) [] 
+            | x > n = [] 
+            | y > n = '\n' : helper (nextRow (x, y)) []
+            | otherwise = '.' : helper (nextCol (x, y)) []
+        helper (x, y) xxs@((r, c):xs)
+            | x == r && y == c = 'Q': helper (nextCol (x, y)) xs
+            | x > n = ""
+            | y > n = '\n' : helper (nextRow (x, y)) xxs
+            | otherwise = '.' : helper (nextCol (x, y)) xxs
 
 --------------------------------------------------------------------------------
 -- Ex 3: The task in this exercise is to define the relations sameRow, sameCol,
