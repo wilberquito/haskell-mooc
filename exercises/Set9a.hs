@@ -124,31 +124,33 @@ sumSuccess = foldl f (Left "no data")
 --   isOpen (open "0000" (changeCode "0000" aLock)) ==> False
 --   isOpen (open "0000" (lock (changeCode "0000" (open "1234" aLock)))) ==> True
 --   isOpen (open "1234" (lock (changeCode "0000" (open "1234" aLock)))) ==> False
+type Locked = Bool
 
-data Lock = LockUndefined
+data Lock = Lock String Locked
   deriving Show
 
 -- aLock should be a locked lock with the code "1234"
 aLock :: Lock
-aLock = todo
+aLock = Lock "1234" True
 
 -- isOpen returns True if the lock is open
 isOpen :: Lock -> Bool
-isOpen = todo
+isOpen (Lock _ locked) = not locked
 
 -- open tries to open the lock with the given code. If the code is
 -- wrong, nothing happens.
 open :: String -> Lock -> Lock
-open = todo
+open code lk@(Lock c _) = if code == c then Lock code False else lk
 
 -- lock closes a lock. If the lock is already closed, nothing happens.
 lock :: Lock -> Lock
-lock = todo
+lock lk@(Lock code locked) = if locked then lk else Lock code True
 
 -- changeCode changes the code of an open lock. If the lock is closed,
 -- nothing happens.
 changeCode :: String -> Lock -> Lock
-changeCode = todo
+changeCode code lk@(Lock _ True) = lk
+changeCode code lk@(Lock _ False) = Lock code False
 
 ------------------------------------------------------------------------------
 -- Ex 7: Here's a type Text that just wraps a String. Implement an Eq
@@ -166,6 +168,9 @@ changeCode = todo
 data Text = Text String
   deriving Show
 
+instance Eq Text where
+    Text a == Text b = filter (not . isSpace) a == filter (not . isSpace) b
+    
 
 ------------------------------------------------------------------------------
 -- Ex 8: We can represent functions or mappings as lists of pairs.
@@ -199,7 +204,11 @@ data Text = Text String
 --       ==> [("a",1),("b",2)]
 
 compose :: (Eq a, Eq b) => [(a,b)] -> [(b,c)] -> [(a,c)]
-compose = todo
+compose xs ys = foldl f [] xs
+    where 
+    f v (a, b) = case lookup b ys of 
+                                (Just c) -> (a, c):v
+                                Nothing  -> v 
 
 ------------------------------------------------------------------------------
 -- Ex 9: Reorder a list using a list of indices.
@@ -243,4 +252,13 @@ multiply :: Permutation -> Permutation -> Permutation
 multiply p q = map (\i -> p !! (q !! i)) (identity (length p))
 
 permute :: Permutation -> [a] -> [a]
-permute = todo
+permute permutations zzs = f (zip permutations zzs) zzs
+    where
+        f :: [(Int, a)] -> [a] -> [a]
+        f [] mutable = mutable
+        f ((i,v):ps) mutable = 
+            let 
+                (left, (r:ight)) = splitAt i mutable
+                yys = left ++ (v:ight)
+            in f ps yys
+
