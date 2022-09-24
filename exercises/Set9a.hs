@@ -75,7 +75,9 @@ countValid = foldl f 0
 --   repeated [1,2,1,2,3,3] ==> Just 3
 
 repeated :: Eq a => [a] -> Maybe a
-repeated = todo
+repeated [] = Nothing
+repeated [x] = Nothing
+repeated (x:y:xs) = if x == y then Just x else repeated (y:xs)
 
 ------------------------------------------------------------------------------
 -- Ex 5: A laboratory has been collecting measurements. Some of the
@@ -97,7 +99,11 @@ repeated = todo
 --     ==> Left "no data"
 
 sumSuccess :: [Either String Int] -> Either String Int
-sumSuccess = todo
+sumSuccess = foldl f (Left "no data")
+    where
+    f v (Left _) = v
+    f (Left _) (Right n) = (Right n)
+    f (Right m) (Right n) = (Right (n + m))
 
 ------------------------------------------------------------------------------
 -- Ex 6: A combination lock can either be open or closed. The lock
