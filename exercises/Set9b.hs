@@ -141,16 +141,16 @@ prettyPrint n coords = helper (1, 1) (sort coords)
 --   sameAntidiag (500,5) (5,500) ==> True
 
 sameRow :: Coord -> Coord -> Bool
-sameRow (i,j) (k,l) = todo
+sameRow (i,_) (k,_) = i == k
 
 sameCol :: Coord -> Coord -> Bool
-sameCol (i,j) (k,l) = todo
+sameCol (_,j) (_,l) = j == l
 
 sameDiag :: Coord -> Coord -> Bool
-sameDiag (i,j) (k,l) = todo
+sameDiag (i,j) (k,l) = k - i == l - j
 
 sameAntidiag :: Coord -> Coord -> Bool
-sameAntidiag (i,j) (k,l) = todo
+sameAntidiag (i,j) (k,l) = k - i == j - l
 
 --------------------------------------------------------------------------------
 -- Ex 4: In chess, a queen may capture another piece in the same row, column,
@@ -205,7 +205,15 @@ type Candidate = Coord
 type Stack     = [Coord]
 
 danger :: Candidate -> Stack -> Bool
-danger = todo
+danger _ [] = False
+danger candidate (pos:xs) = if dz candidate pos then True else danger candidate xs
+    where
+        dz candidate checkPos 
+            | sameRow candidate checkPos = True
+            | sameCol candidate checkPos = True
+            | sameDiag candidate checkPos = True
+            | sameAntidiag candidate checkPos = True
+            | otherwise = False
 
 --------------------------------------------------------------------------------
 -- Ex 5: In this exercise, the task is to write a modified version of
@@ -240,8 +248,19 @@ danger = todo
 -- solution to this version. Any working solution is okay in this exercise.)
 
 prettyPrint2 :: Size -> Stack -> String
-prettyPrint2 = todo
-
+prettyPrint2 n queens = 
+    let 
+        str = prettyPrint n queens
+    in helper (1, 1) str
+    where
+        helper _ [] = []
+        helper candidate@(r, c) str@(s:sx)
+            | r > n = []
+            | c > n = '\n' : helper (nextRow candidate) sx
+            | s == 'Q' = s : helper (nextCol candidate) sx
+            | danger candidate queens = '#' : helper (nextCol candidate) sx 
+            | otherwise = s : helper (nextCol candidate) sx
+    
 --------------------------------------------------------------------------------
 -- Ex 6: Now that we can check if a piece can be safely placed into a square in
 -- the chessboard, it's time to write the first piece of the actual solution.
