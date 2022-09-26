@@ -318,7 +318,7 @@ fixFirst n xxs@(f@(r, c) : xs)
 
 --   top of the stack (front of the list). The new candidate should be
 --   at the beginning of the next row with respect to the queen
---   previously on top of the stack.
+--   previously on top of the stack
 --
 
 -- * backtrack moves back to the previous row. It removes the top
@@ -334,10 +334,13 @@ fixFirst n xxs@(f@(r, c) : xs)
 -- Hint: Remember nextRow and nextCol? Use them!
 
 continue :: Stack -> Stack
-continue s = todo
+continue [] = [(1, 1)]
+continue xxs@(x : _) = nextRow x : xxs
 
 backtrack :: Stack -> Stack
-backtrack s = todo
+backtrack [] = []
+backtrack [x] = []
+backtrack (_ : y : xs) = nextCol y : xs
 
 --------------------------------------------------------------------------------
 -- Ex 8: Let's take a step. Our algorithm solves the problem (in a
