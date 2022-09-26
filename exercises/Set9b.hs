@@ -1,8 +1,7 @@
 module Set9b where
 
-import Mooc.Todo
-
 import Data.List
+import Mooc.Todo
 
 --------------------------------------------------------------------------------
 -- Ex 1: In this exercise set, we'll solve the N Queens problem step by step.
@@ -42,15 +41,17 @@ import Data.List
 -- the roles of different function arguments clearer without adding syntactical
 -- overhead:
 
-type Row   = Int
-type Col   = Int
+type Row = Int
+
+type Col = Int
+
 type Coord = (Row, Col)
 
 nextRow :: Coord -> Coord
-nextRow (i,j) = (i + 1, 1)
+nextRow (i, j) = (i + 1, 1)
 
 nextCol :: Coord -> Coord
-nextCol (i,j) = (i, j + 1)
+nextCol (i, j) = (i, j + 1)
 
 --------------------------------------------------------------------------------
 -- Ex 2: Implement the function prettyPrint that, given the size of
@@ -102,22 +103,22 @@ nextCol (i,j) = (i, j + 1)
 
 type Size = Int
 
-debugPrettyPrint :: Size -> [Coord] -> IO()
+debugPrettyPrint :: Size -> [Coord] -> IO ()
 debugPrettyPrint n coords = putStrLn $ prettyPrint n coords
 
 prettyPrint :: Size -> [Coord] -> String
 prettyPrint n coords = helper (1, 1) (sort coords)
-    where
-        helper :: Coord -> [Coord] -> String
-        helper (x, y) [] 
-            | x > n = [] 
-            | y > n = '\n' : helper (nextRow (x, y)) []
-            | otherwise = '.' : helper (nextCol (x, y)) []
-        helper (x, y) xxs@((r, c):xs)
-            | x == r && y == c = 'Q': helper (nextCol (x, y)) xs
-            | x > n = ""
-            | y > n = '\n' : helper (nextRow (x, y)) xxs
-            | otherwise = '.' : helper (nextCol (x, y)) xxs
+  where
+    helper :: Coord -> [Coord] -> String
+    helper (x, y) []
+      | x > n = []
+      | y > n = '\n' : helper (nextRow (x, y)) []
+      | otherwise = '.' : helper (nextCol (x, y)) []
+    helper (x, y) xxs@((r, c) : xs)
+      | x == r && y == c = 'Q' : helper (nextCol (x, y)) xs
+      | x > n = ""
+      | y > n = '\n' : helper (nextRow (x, y)) xxs
+      | otherwise = '.' : helper (nextCol (x, y)) xxs
 
 --------------------------------------------------------------------------------
 -- Ex 3: The task in this exercise is to define the relations sameRow, sameCol,
@@ -141,16 +142,16 @@ prettyPrint n coords = helper (1, 1) (sort coords)
 --   sameAntidiag (500,5) (5,500) ==> True
 
 sameRow :: Coord -> Coord -> Bool
-sameRow (i,_) (k,_) = i == k
+sameRow (i, _) (k, _) = i == k
 
 sameCol :: Coord -> Coord -> Bool
-sameCol (_,j) (_,l) = j == l
+sameCol (_, j) (_, l) = j == l
 
 sameDiag :: Coord -> Coord -> Bool
-sameDiag (i,j) (k,l) = k - i == l - j
+sameDiag (i, j) (k, l) = k - i == l - j
 
 sameAntidiag :: Coord -> Coord -> Bool
-sameAntidiag (i,j) (k,l) = k - i == j - l
+sameAntidiag (i, j) (k, l) = k - i == j - l
 
 --------------------------------------------------------------------------------
 -- Ex 4: In chess, a queen may capture another piece in the same row, column,
@@ -202,18 +203,19 @@ sameAntidiag (i,j) (k,l) = k - i == j - l
 -- https://en.wikipedia.org/wiki/Stack_(abstract_data_type)
 
 type Candidate = Coord
-type Stack     = [Coord]
+
+type Stack = [Coord]
 
 danger :: Candidate -> Stack -> Bool
 danger _ [] = False
-danger candidate (pos:xs) = if dz candidate pos then True else danger candidate xs
-    where
-        dz candidate checkPos 
-            | sameRow candidate checkPos = True
-            | sameCol candidate checkPos = True
-            | sameDiag candidate checkPos = True
-            | sameAntidiag candidate checkPos = True
-            | otherwise = False
+danger candidate (pos : xs) = if dz candidate pos then True else danger candidate xs
+  where
+    dz candidate checkPos
+      | sameRow candidate checkPos = True
+      | sameCol candidate checkPos = True
+      | sameDiag candidate checkPos = True
+      | sameAntidiag candidate checkPos = True
+      | otherwise = False
 
 --------------------------------------------------------------------------------
 -- Ex 5: In this exercise, the task is to write a modified version of
@@ -248,19 +250,18 @@ danger candidate (pos:xs) = if dz candidate pos then True else danger candidate 
 -- solution to this version. Any working solution is okay in this exercise.)
 
 prettyPrint2 :: Size -> Stack -> String
-prettyPrint2 n queens = 
-    let 
-        str = prettyPrint n queens
-    in helper (1, 1) str
-    where
-        helper _ [] = []
-        helper candidate@(r, c) str@(s:sx)
-            | r > n = []
-            | c > n = '\n' : helper (nextRow candidate) sx
-            | s == 'Q' = s : helper (nextCol candidate) sx
-            | danger candidate queens = '#' : helper (nextCol candidate) sx 
-            | otherwise = s : helper (nextCol candidate) sx
-    
+prettyPrint2 n queens =
+  let str = prettyPrint n queens
+   in helper (1, 1) str
+  where
+    helper _ [] = []
+    helper candidate@(r, c) str@(s : sx)
+      | r > n = []
+      | c > n = '\n' : helper (nextRow candidate) sx
+      | s == 'Q' = s : helper (nextCol candidate) sx
+      | danger candidate queens = '#' : helper (nextCol candidate) sx
+      | otherwise = s : helper (nextCol candidate) sx
+
 --------------------------------------------------------------------------------
 -- Ex 6: Now that we can check if a piece can be safely placed into a square in
 -- the chessboard, it's time to write the first piece of the actual solution.
@@ -304,17 +305,24 @@ prettyPrint2 n queens =
 --     Q#######
 
 fixFirst :: Size -> Stack -> Maybe Stack
-fixFirst n s = todo
+fixFirst n [] = Nothing
+fixFirst n xxs@(f@(r, c) : xs)
+  | r > n || c > n = Nothing
+  | otherwise = if not $ danger f xs then Just xxs else fixFirst n (nextCol f : xs)
 
 --------------------------------------------------------------------------------
 -- Ex 7: We need two helper functions for stack management.
 --
+
 -- * continue moves on to a new row. It pushes a new candidate to the
+
 --   top of the stack (front of the list). The new candidate should be
 --   at the beginning of the next row with respect to the queen
 --   previously on top of the stack.
 --
+
 -- * backtrack moves back to the previous row. It removes the top
+
 --   element of the stack, and adjusts the new top element so that it
 --   is in the next column.
 --
@@ -416,4 +424,4 @@ finish :: Size -> Stack -> Stack
 finish = todo
 
 solve :: Size -> Stack
-solve n = finish n [(1,1)]
+solve n = finish n [(1, 1)]
