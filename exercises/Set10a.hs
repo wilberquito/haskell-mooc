@@ -97,7 +97,11 @@ averages xxs = helper 1 0 xxs
 --   take 10 (alternate [1,2] [3,4,5] 0) ==> [1,2,0,3,4,5,0,1,2,0]
 
 alternate :: [a] -> [a] -> a -> [a]
-alternate xs ys z = todo
+alternate xs ys z = helper 0 xs ys
+  where
+    helper i xs ys
+      | even i = xs ++ (z : helper (i + 1) xs ys)
+      | otherwise = ys ++ (z : helper (i + 1) xs ys)
 
 ------------------------------------------------------------------------------
 -- Ex 6: Check if the length of a list is at least n. Make sure your
