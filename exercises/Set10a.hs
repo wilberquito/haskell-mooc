@@ -113,7 +113,7 @@ alternate xs ys z = helper 0 xs ys
 --   lengthAtLeast 10 [0..]  ==> True
 
 lengthAtLeast :: Int -> [a] -> Bool
-lengthAtLeast = todo
+lengthAtLeast n xxs = length (take n xxs) >= n
 
 ------------------------------------------------------------------------------
 -- Ex 7: The function chunks should take in a list, and a number n,
@@ -131,7 +131,10 @@ lengthAtLeast = todo
 --   take 4 (chunks 3 [0..]) ==> [[0,1,2],[1,2,3],[2,3,4],[3,4,5]]
 
 chunks :: Int -> [a] -> [[a]]
-chunks = todo
+chunks _ [] = []
+chunks n xxs@(_ : xs)
+  | length (take n xxs) == n = take n xxs : chunks n xs
+  | otherwise = []
 
 ------------------------------------------------------------------------------
 -- Ex 8: Define a newtype called IgnoreCase, that wraps a value of
@@ -147,7 +150,12 @@ chunks = todo
 --   ignorecase "abC" == ignorecase "ABc"  ==>  True
 --   ignorecase "acC" == ignorecase "ABc"  ==>  False
 
-ignorecase = todo
+newtype IgnoreCase = IgnoreCase String
+
+instance Eq IgnoreCase where
+  (==) (IgnoreCase a) (IgnoreCase b) = map toLower a == map toLower b
+
+ignorecase = IgnoreCase
 
 ------------------------------------------------------------------------------
 -- Ex 9: Here's the Room type and some helper functions from the
@@ -192,4 +200,8 @@ play room (d : ds) = case move room d of
   Just r -> describe room : play r ds
 
 maze :: Room
-maze = todo
+maze =
+  let maze1 = Room "Maze" [("Left", maze2), ("Right", maze3)]
+      maze2 = Room "Deeper in the maze" [("Left", maze3), ("Right", maze1)]
+      maze3 = Room "Elsewhere in the maze" [("Left", maze1), ("Right", maze2)]
+   in maze1
