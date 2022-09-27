@@ -37,7 +37,9 @@ doublify (x : xs) = x : x : doublify xs
 --   take 10 (interleave [1..] (repeat 0)) ==> [1,0,2,0,3,0,4,0,5,0]
 
 interleave :: [a] -> [a] -> [a]
-interleave = todo
+interleave [] yys = yys
+interleave xxs [] = xxs
+interleave (x : xs) (y : ys) = x : y : interleave xs ys
 
 ------------------------------------------------------------------------------
 -- Ex 3: Deal out cards. Given a list of players (strings), and a list
@@ -56,7 +58,8 @@ interleave = todo
 -- Hint: remember the functions cycle and zip?
 
 deal :: [String] -> [String] -> [(String, String)]
-deal = todo
+deal players [] = []
+deal players cards = cards `zip` cycle players
 
 ------------------------------------------------------------------------------
 -- Ex 4: Compute a running average. Go through a list of Doubles and
@@ -72,7 +75,11 @@ deal = todo
 --   take 10 (averages [1..]) ==> [1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5]
 
 averages :: [Double] -> [Double]
-averages = todo
+averages [] = []
+averages xxs = helper 1 0 xxs
+  where
+    helper _ _ [] = []
+    helper iter acc (x : xs) = ((acc + x) / iter) : helper (iter + 1) (acc + x) xs
 
 ------------------------------------------------------------------------------
 -- Ex 5: Given two lists, xs and ys, and an element z, generate an
