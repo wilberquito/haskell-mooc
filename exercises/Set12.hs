@@ -148,9 +148,10 @@ data Fun a = Fun (Int -> a)
 runFun :: Fun a -> Int -> a
 runFun (Fun f) x = f x
 
-instance Functor Fun
+instance Functor Fun where
+  fmap g (Fun f) = Fun (g . f)
 
-------------------------------------------------------------------------------
+-----------------------------------------------------------------------------
 -- Ex 11: (Tricky!) You'll find the binary tree type from Set 5b
 -- below. We'll implement a `Foldable` instance for it!
 --
@@ -205,10 +206,12 @@ data Tree a = Leaf | Node a (Tree a) (Tree a)
   deriving (Show)
 
 instance Functor Tree where
-  fmap = todo
+  fmap f Leaf = Leaf
+  fmap f (Node a ln rn) = Node (f a) (fmap f ln) (fmap f rn)
 
 sumTree :: Monoid m => Tree m -> m
-sumTree = todo
+sumTree Leaf = mempty
+sumTree (Node a ln rn) = sumTree ln <> a <> sumTree rn
 
 instance Foldable Tree where
   foldMap f t = sumTree (fmap f t)
