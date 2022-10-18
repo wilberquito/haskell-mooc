@@ -101,7 +101,11 @@ checkCapitals (for,sur)
 --     ==> Just "a"
 
 winner :: [(String,Int)] -> String -> String -> Maybe String
-winner scores player1 player2 = todo
+winner scores p1 p2 = 
+    do
+        p1score <- lookup p1 scores
+        p2score <- lookup p2 scores
+        return $ if p2score > p1score then p2 else p1
 
 ------------------------------------------------------------------------------
 -- Ex 3: given a list of indices and a list of values, return the sum
@@ -118,8 +122,15 @@ winner scores player1 player2 = todo
 --  selectSum [0..10] [4,6,9,20]
 --    Nothing
 
+safeIndex :: [a] -> Int -> Maybe a
+safeIndex xs i
+    | i < 0 = Nothing
+    | null xs = Nothing
+    | i == 0 = (Just . head) xs
+    | otherwise = safeIndex (tail xs) (i - 1)
+
 selectSum :: Num a => [a] -> [Int] -> Maybe a
-selectSum xs is = todo
+selectSum xs is = fmap sum $ mapM (safeIndex xs) is
 
 ------------------------------------------------------------------------------
 -- Ex 4: Here is the Logger monad from the course material. Implement
