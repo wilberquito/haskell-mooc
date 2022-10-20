@@ -164,7 +164,10 @@ instance Applicative Logger where
   (<*>) = ap
 
 countAndLog :: Show a => (a -> Bool) -> [a] -> Logger Int
-countAndLog = todo
+countAndLog _ [] = return 0
+countAndLog pred (x:xs)
+    | pred x = fmap succ $ msg (show x) >> countAndLog pred xs
+    | otherwise = countAndLog pred xs
 
 ------------------------------------------------------------------------------
 -- Ex 5: You can find the Bank and BankOp code from the course
