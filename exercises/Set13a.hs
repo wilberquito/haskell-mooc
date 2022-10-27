@@ -185,9 +185,11 @@ exampleBank = (Bank (Map.fromList [("harry",10),("cedric",7),("ginny",1)]))
 
 balance :: String -> BankOp Int
 balance accountName = BankOp f
-    where f bank@(Bank m) = case Map.lookup accountName m of
-                        Just val -> (val, bank)
-                        Nothing -> (0, bank)
+    where 
+        f bank@(Bank m) = 
+            case Map.lookup accountName m of
+                Just val -> (val, bank)
+                Nothing -> (0, bank)
 
 ------------------------------------------------------------------------------
 -- Ex 6: Using the operations balance, withdrawOp and depositOp, and
