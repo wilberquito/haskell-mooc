@@ -223,7 +223,12 @@ rob from to =   balance from
 --    ==> ((),7)
 
 update :: State Int ()
-update = todo
+update = 
+    do
+        s <- get
+        put $ 2 * s
+        s' <- get
+        put $ s' + 1
 
 ------------------------------------------------------------------------------
 -- Ex 8: Checking that parentheses are balanced with the State monad.
@@ -251,7 +256,16 @@ update = todo
 --   parensMatch "(()))("      ==> False
 
 paren :: Char -> State Int ()
-paren = todo
+paren c = 
+    do
+        s <- get
+        put $ clamp s 
+    where
+        clamp n
+            | n <= -1 = -1
+            | c == ')' = n - 1
+            | otherwise = n + 1
+
 
 parensMatch :: String -> Bool
 parensMatch s = count == 0
@@ -282,7 +296,12 @@ parensMatch s = count == 0
 -- PS. The order of the list of pairs doesn't matter
 
 count :: Eq a => a -> State [(a,Int)] ()
-count x = todo
+count x = modify (f x)
+    where
+        f x [] = [(x, 1)]
+        f x ((k, v) : xs)
+            | k == x = (k, succ v) : xs
+            | otherwise = (k, v) : f x xs
 
 ------------------------------------------------------------------------------
 -- Ex 10: Implement the operation occurrences, which
@@ -304,4 +323,4 @@ count x = todo
 --    ==> (4,[(2,1),(3,1),(4,1),(7,1)])
 
 occurrences :: (Eq a) => [a] -> State [(a,Int)] Int
-occurrences xs = todo
+occurrences xs = mapM_ count xs >> length <$> get 
