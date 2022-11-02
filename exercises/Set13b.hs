@@ -181,7 +181,12 @@ path maze place1 place2 = place2 `elem` places
 -- PS. The tests don't care about the order of results.
 
 findSum2 :: [Int] -> [Int] -> [(Int,Int,Int)]
-findSum2 ks ns = todo
+findSum2 ks ns = 
+    do
+        i <- ks
+        j <- ks
+        n <- ns
+        if (i + j == n) then [(i, j, n)] else []
 
 ------------------------------------------------------------------------------
 -- Ex 5: compute all possible sums of elements from the given
@@ -202,7 +207,11 @@ findSum2 ks ns = todo
 --     ==> [7,3,5,1,6,2,4,0]
 
 allSums :: [Int] -> [Int]
-allSums xs = todo
+allSums [] = [0]
+allSums (x : xs) = do
+  term <- [x, 0]
+  sum <- allSums xs
+  return $ term + sum
 
 ------------------------------------------------------------------------------
 -- Ex 6: the standard library defines the function
@@ -232,7 +241,7 @@ sumBounded :: Int -> [Int] -> Maybe Int
 sumBounded k xs = foldM (f1 k) 0 xs
 
 f1 :: Int -> Int -> Int -> Maybe Int
-f1 k acc x = todo
+f1 k acc x = if acc + x > k then Nothing else Just $ acc + x
 
 -- sumNotTwice computes the sum of a list, but counts only the first
 -- occurrence of each value.
@@ -246,8 +255,13 @@ sumNotTwice :: [Int] -> Int
 sumNotTwice xs = fst $ runState (foldM f2 0 xs) []
 
 f2 :: Int -> Int -> State [Int] Int
-f2 acc x = todo
-
+f2 acc x =
+    do
+        xs <- get
+        if x `elem` xs
+        then return acc
+        else modify (x : ) >> return (x + acc)
+             
 ------------------------------------------------------------------------------
 -- Ex 7: here is the Result type from Set12. Implement a Monad Result
 -- instance that behaves roughly like the Monad Maybe instance.
