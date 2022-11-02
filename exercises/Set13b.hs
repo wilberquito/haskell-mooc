@@ -285,7 +285,9 @@ data Result a = MkResult a | NoResult | Failure String deriving (Show,Eq)
 
 instance Functor Result where
   -- The same Functor instance you used in Set12 works here.
-  fmap = todo
+  fmap _ NoResult = NoResult 
+  fmap _ (Failure s) = Failure s
+  fmap f (MkResult r) = MkResult $ f r
 
 -- This is an Applicative instance that works for any monad, you
 -- can just ignore it for now. We'll get back to Applicative later.
@@ -295,8 +297,10 @@ instance Applicative Result where
 
 instance Monad Result where
   -- implement return and >>=
-  return = todo
-  (>>=) = todo
+  return x = MkResult x
+  NoResult >>= _ = NoResult
+  Failure s >>= _ = Failure s
+  MkResult r >>= fn = fn r
 
 ------------------------------------------------------------------------------
 -- Ex 8: Here is the type SL that combines the State and Logger
@@ -344,7 +348,9 @@ modifySL f = SL (\s -> ((),f s,[]))
 
 instance Functor SL where
   -- implement fmap
-  fmap = todo
+  fmap f (SL g) = SL $ h . g
+    where
+        h (a, b, c) = (f a, b, c)
 
 -- This is an Applicative instance that works for any monad, you
 -- can just ignore it for now. We'll get back to Applicative later.
@@ -354,8 +360,14 @@ instance Applicative SL where
 
 instance Monad SL where
   -- implement return and >>=
-  return = todo
-  (>>=) = todo
+  return x = SL (\e -> (x, e, []))
+  op >>= f = SL g
+    where
+      g s0 =
+        let (x, s, l) = runSL op s0
+            op2 = f x
+            (x', s', l') = runSL op2 s
+         in (x', s', l ++ l')
 
 ------------------------------------------------------------------------------
 -- Ex 9: Implement the operation mkCounter that produces the IO operations
@@ -383,4 +395,7 @@ instance Monad SL where
 --  4
 
 mkCounter :: IO (IO (), IO Int)
-mkCounter = todo
+mkCounter = 
+    do
+        ref <- newIORef 0
+        return (modifyIORef ref succ, readIORef ref)
