@@ -58,7 +58,10 @@ shout = T.unwords . (mapper 0) . T.words
 --   longestRepeat (T.pack "aabbbbccc") ==> 4
 
 longestRepeat :: T.Text -> Int
-longestRepeat = todo
+longestRepeat = safeMaximum . (map T.length) . T.group
+    where
+        safeMaximum [] = 0
+        safeMaximum xs = maximum xs
 
 ------------------------------------------------------------------------------
 -- Ex 4: Given a lazy (potentially infinite) Text, extract the first n
