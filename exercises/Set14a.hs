@@ -42,7 +42,12 @@ greetText text
 --     ==> "WORD"
 
 shout :: T.Text -> T.Text
-shout = todo
+shout = T.unwords . (mapper 0) . T.words
+    where
+        mapper _ [] = []
+        mapper i (x:xs)
+            | even i = T.toUpper x : mapper (succ i) xs
+            | otherwise = x : mapper (succ i) xs 
 
 ------------------------------------------------------------------------------
 -- Ex 3: Find the longest sequence of a single character repeating in
