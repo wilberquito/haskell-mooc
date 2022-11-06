@@ -20,6 +20,8 @@ import qualified Data.Text.Read as TR
 import Data.Text.Encoding (encodeUtf8)
 import Text.Read (readMaybe)
 
+import Data.Tuple.Only
+
 -- HTTP server
 import Network.Wai (pathInfo, responseLBS, Application)
 import Network.Wai.Handler.Warp (run)
@@ -112,8 +114,17 @@ deposit db name amount = execute db depositQuery (T.unpack name, amount)
 balanceQuery :: Query
 balanceQuery = Query (T.pack "SELECT amount FROM events WHERE account = ?;")
 
+sumBalanceQuery :: Query
+sumBalanceQuery = Query (T.pack "SELECT SUM(amount) FROM events WHERE account = ?;")
+
+getSumBalance :: Connection -> T.Text -> IO [[Maybe Int]]
+getSumBalance db name = query db sumBalanceQuery [name]
+
 balance :: Connection -> T.Text -> IO Int
-balance = todo
+balance db name = 
+    do
+        cols <- getSumBalance db name
+        return $ maybe 0 id ((head . head) cols) 
 
 ------------------------------------------------------------------------------
 -- Ex 3: Now that we have the database part covered, let's think about
