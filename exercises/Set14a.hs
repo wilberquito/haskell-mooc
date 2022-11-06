@@ -74,8 +74,12 @@ longestRepeat = safeMaximum . (map T.length) . T.group
 --   takeStrict 15 (TL.pack (cycle "asdf"))  ==>  "asdfasdfasdfasd"
 
 takeStrict :: Int64 -> TL.Text -> T.Text
-takeStrict = todo
-
+takeStrict n lazyText
+    | n == 0 = T.pack ""
+    | otherwise = case TL.uncons lazyText of
+                    Nothing -> T.pack ""
+                    Just (x, xs) -> T.append (T.pack [x]) (takeStrict (pred n) xs)
+                    
 ------------------------------------------------------------------------------
 -- Ex 5: Find the difference between the largest and smallest byte
 -- value in a ByteString. Return 0 for an empty ByteString
@@ -86,7 +90,9 @@ takeStrict = todo
 --   byteRange (B.pack [3]) ==> 0
 
 byteRange :: B.ByteString -> Word8
-byteRange = todo
+byteRange bstr
+    | B.null bstr = 0
+    | otherwise = B.maximum bstr - B.minimum bstr
 
 ------------------------------------------------------------------------------
 -- Ex 6: Compute the XOR checksum of a ByteString. The XOR checksum of
@@ -107,7 +113,7 @@ byteRange = todo
 --   xorChecksum (B.pack []) ==> 0
 
 xorChecksum :: B.ByteString -> Word8
-xorChecksum = todo
+xorChecksum = B.foldr (\acc x -> xor acc x) 0 
 
 ------------------------------------------------------------------------------
 -- Ex 7: Given a ByteString, compute how many UTF-8 characters it
@@ -124,7 +130,10 @@ xorChecksum = todo
 --   countUtf8Chars (B.drop 1 (encodeUtf8 (T.pack "åäö"))) ==> Nothing
 
 countUtf8Chars :: B.ByteString -> Maybe Int
-countUtf8Chars = todo
+countUtf8Chars = (fmap T.length) . toMaybe . decodeUtf8'
+    where
+        toMaybe (Right x) = Just x
+        toMaybe _ = Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 8: Given a (nonempty) strict ByteString b, generate an infinite
@@ -136,5 +145,5 @@ countUtf8Chars = todo
 --     ==> [0,1,2,2,1,0,0,1,2,2,1,0,0,1,2,2,1,0,0,1]
 
 pingpong :: B.ByteString -> BL.ByteString
-pingpong = todo
+pingpong bstr = BL.append ((BL.pack . B.unpack) bstr) (pingpong (B.reverse bstr))
 
