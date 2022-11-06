@@ -121,7 +121,7 @@ getSumBalance :: Connection -> T.Text -> IO [[Maybe Int]]
 getSumBalance db name = query db sumBalanceQuery [name]
 
 balance :: Connection -> T.Text -> IO Int
-balance db name = 
+balance db name =
     do
         cols <- getSumBalance db name
         return $ maybe 0 id ((head . head) cols) 
@@ -163,7 +163,11 @@ parseInt :: T.Text -> Maybe Int
 parseInt = readMaybe . T.unpack
 
 parseCommand :: [T.Text] -> Maybe Command
-parseCommand = todo
+parseCommand [] = Nothing
+parseCommand (x:xs)
+    | T.unpack x == "balance" = Just $ Balance (head xs)
+    | T.unpack x == "deposit" = Just $ Deposit (head xs) (maybe 0 id (parseInt $ head $ tail xs))
+    | otherwise = Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 4: Running commands. Implement the IO operation perform that takes a
