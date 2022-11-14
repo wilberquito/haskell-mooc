@@ -156,7 +156,7 @@ balance db name =
 --   parseCommand [T.pack "deposit", T.pack "madoff", T.pack "123456"]
 --     ==> Just (Deposit "madoff" 123456)
 
-data Command = Deposit T.Text Int | Balance T.Text
+data Command = Deposit T.Text Int | Balance T.Text | Withdraw T.Text Int
   deriving (Show, Eq)
 
 parseInt :: T.Text -> Maybe Int
@@ -167,6 +167,7 @@ parseCommand [] = Nothing
 parseCommand (x:xs)
     | T.unpack x == "balance" = Just $ Balance (head xs)
     | T.unpack x == "deposit" = Just $ Deposit (head xs) (maybe 0 id (parseInt $ head $ tail xs))
+    | T.unpack x == "withdraw" = Just $ Withdraw (head xs) (maybe 0 id (parseInt $ head $ tail xs))
     | otherwise = Nothing
 
 ------------------------------------------------------------------------------
@@ -194,9 +195,9 @@ parseCommand (x:xs)
 
 perform :: Connection -> Maybe Command -> IO T.Text
 perform conn (Just (Deposit name amount)) = deposit conn name amount >> return (T.pack "OK")
+perform conn (Just (Withdraw name amount)) = withdraw conn name amount >> return (T.pack "OK")
 perform conn (Just (Balance name)) = balance conn name >>= (return . T.pack . show)
-perform _ Nothing = return $ T.pack "not expected"
-
+perform _ Nothing = return $ T.pack "ERROR"
 ------------------------------------------------------------------------------
 -- Ex 5: Next up, let's set up a simple HTTP server. Implement a WAI
 -- Application simpleServer that always responds with a HTTP status
@@ -279,9 +280,13 @@ main = do
 --   - Open <http://localhost:3421/balance/simon> in your browser.
 --     You should see the text 11.
 
+-- balance :: Connection -> T.Text -> IO Int
+-- deposit :: Connection -> T.Text -> Int -> IO ()
+withdraw :: Connection -> T.Text -> Int -> IO ()
+withdraw conn name amount = balance conn name >>= \x -> deposit conn name (x - amount)
 
 ------------------------------------------------------------------------------
--- Ex 8: Error handling. Modify the parseCommand function so that it
+-- Ex 8: Error handling. Modify the parseComand function so that it
 -- returns Nothing when the input is not valid. Modify the perform
 -- function so that it produces an "ERROR" response given a Nothing.
 --
