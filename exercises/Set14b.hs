@@ -193,8 +193,8 @@ parseCommand (x:xs)
 --   "0"
 
 perform :: Connection -> Maybe Command -> IO T.Text
-perform conn (Just (Deposit name amount)) = deposit conn name amount >> return (T.pack "OK") 
-perform conn (Just (Balance name)) = balance conn name >>= (return . T.pack . show)  
+perform conn (Just (Deposit name amount)) = deposit conn name amount >> return (T.pack "OK")
+perform conn (Just (Balance name)) = balance conn name >>= (return . T.pack . show)
 perform _ Nothing = return $ T.pack "not expected"
 
 ------------------------------------------------------------------------------
@@ -215,8 +215,8 @@ encodeResponse t = LB.fromStrict (encodeUtf8 t)
 -- Remember:
 -- type Application = Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
 simpleServer :: Application
-simpleServer request respond = todo
-
+simpleServer request respond =
+  respond (responseLBS status200 [] (encodeResponse $ T.pack "BANK"))
 ------------------------------------------------------------------------------
 -- Ex 6: Now we finally have all the pieces we need to actually
 -- implement our API. Implement a WAI Application called server that
@@ -244,7 +244,11 @@ simpleServer request respond = todo
 -- Remember:
 -- type Application = Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
 server :: Connection -> Application
-server db request respond = todo
+server db request respond = 
+    do 
+        let command = parseCommand $ pathInfo request
+        response <- perform db command
+        respond (responseLBS status200 [] (encodeResponse response))
 
 port :: Int
 port = 3421
