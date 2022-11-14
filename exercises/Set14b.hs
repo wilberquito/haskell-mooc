@@ -193,7 +193,9 @@ parseCommand (x:xs)
 --   "0"
 
 perform :: Connection -> Maybe Command -> IO T.Text
-perform = todo
+perform conn (Just (Deposit name amount)) = deposit conn name amount >> return (T.pack "OK") 
+perform conn (Just (Balance name)) = balance conn name >>= (return . T.pack . show)  
+perform _ Nothing = return $ T.pack "not expected"
 
 ------------------------------------------------------------------------------
 -- Ex 5: Next up, let's set up a simple HTTP server. Implement a WAI
