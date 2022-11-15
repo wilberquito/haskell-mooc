@@ -164,10 +164,10 @@ parseInt = readMaybe . T.unpack
 
 parseCommand :: [T.Text] -> Maybe Command
 parseCommand [] = Nothing
-parseCommand (x:xs)
-    | T.unpack x == "balance" = Just $ Balance (head xs)
-    | T.unpack x == "deposit" = Just $ Deposit (head xs) (maybe 0 id (parseInt $ head $ tail xs))
-    | T.unpack x == "withdraw" = Just $ Withdraw (head xs) (maybe 0 id (parseInt $ head $ tail xs))
+parseCommand xxs@(x:xs)
+    | T.unpack x == "balance" = maybeBalance xxs
+    | T.unpack x == "deposit" = maybeDeposit xxs
+    | T.unpack x == "withdraw" = maybeWithdraw xxs 
     | otherwise = Nothing
 
 ------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ perform :: Connection -> Maybe Command -> IO T.Text
 perform conn (Just (Deposit name amount)) = deposit conn name amount >> return (T.pack "OK")
 perform conn (Just (Withdraw name amount)) = withdraw conn name amount >> return (T.pack "OK")
 perform conn (Just (Balance name)) = balance conn name >>= (return . T.pack . show)
-perform _ Nothing = return $ T.pack "ERROR"
+perform _ Nothing = return (T.pack "ERROR")
 ------------------------------------------------------------------------------
 -- Ex 5: Next up, let's set up a simple HTTP server. Implement a WAI
 -- Application simpleServer that always responds with a HTTP status
@@ -283,7 +283,7 @@ main = do
 -- balance :: Connection -> T.Text -> IO Int
 -- deposit :: Connection -> T.Text -> Int -> IO ()
 withdraw :: Connection -> T.Text -> Int -> IO ()
-withdraw conn name amount = balance conn name >>= \x -> deposit conn name (x - amount)
+withdraw conn name amount = deposit conn name (amount * (-1))
 
 ------------------------------------------------------------------------------
 -- Ex 8: Error handling. Modify the parseComand function so that it
@@ -304,4 +304,30 @@ withdraw conn name amount = balance conn name >>= \x -> deposit conn name (x - a
 --    - http://localhost:3421/balance
 --    - http://localhost:3421/balance/matti/pekka
 
+maybeBalance :: [T.Text] -> Maybe Command
+maybeBalance [] = Nothing
+maybeBalance (x:xs)
+    | T.unpack x == "balance" = if null xs || length xs /= 1 then Nothing else Just $ Balance (head xs)
+    | otherwise = Nothing
 
+maybeDeposit :: [T.Text] -> Maybe Command
+maybeDeposit [] = Nothing
+maybeDeposit (x:xs)
+    | T.unpack x == "deposit" =
+        if null xs || length xs /= 2
+        then Nothing 
+        else case parseInt (xs !! 1) of
+            Nothing -> Nothing
+            Just amount -> Just $ Deposit (head xs) amount
+    | otherwise = Nothing
+
+maybeWithdraw :: [T.Text] -> Maybe Command
+maybeWithdraw [] = Nothing
+maybeWithdraw (x:xs)
+    | T.unpack x == "withdraw" =
+        if null xs || length xs /= 2
+        then Nothing 
+        else case parseInt (xs !! 1) of
+            Nothing -> Nothing
+            Just amount -> Just $ Withdraw (head xs) amount
+    | otherwise = Nothing
