@@ -6,6 +6,7 @@ import Examples.Validation
 import Control.Applicative
 import Data.Char
 import Text.Read (readMaybe)
+import Data.Maybe
 
 ------------------------------------------------------------------------------
 -- Ex 1: Sum two Maybe Int values using Applicative operations (i.e.
@@ -132,9 +133,11 @@ data Person = Person String Int Bool
   deriving (Show, Eq)
 
 twoPersons :: Applicative f =>
-  f String -> f Int -> f Bool -> f String -> f Int -> f Bool
-  -> f [Person]
-twoPersons name1 age1 employed1 name2 age2 employed2 = todo
+  f String -> f Int -> f Bool -> f String -> f Int -> f Bool -> f [Person]
+twoPersons name1 age1 employed1 name2 age2 employed2 = traverse id [p1, p2] 
+    where
+        p1 = Person <$> name1 <*> age1 <*> employed1
+        p2 = Person <$> name2 <*> age2 <*> employed2
 
 ------------------------------------------------------------------------------
 -- Ex 7: Validate a String that's either a Bool or an Int. The return
@@ -146,7 +149,7 @@ twoPersons name1 age1 employed1 name2 age2 employed2 = todo
 --
 -- PS. The tests won't test special cases of Int literals like hexadecimal
 -- (0x3a) or octal (0o14).
---
+
 -- Examples:
 --  boolOrInt "True"    ==> Ok (Left True)
 --  boolOrInt "13"      ==> Ok (Right 13)
@@ -154,7 +157,10 @@ twoPersons name1 age1 employed1 name2 age2 employed2 = todo
 --  boolOrInt "Falseb"  ==> Errors ["Not a Bool","Not an Int"]
 
 boolOrInt :: String -> Validation (Either Bool Int)
-boolOrInt = todo
+boolOrInt s = checkBool <|> checkInt 
+    where
+        checkBool = check (isJust (readMaybe s :: Maybe Bool)) "Not a Bool" (Left (read s))
+        checkInt = check (isJust (readMaybe s :: Maybe Int)) "Not an Int" (Right (read s))
 
 ------------------------------------------------------------------------------
 -- Ex 8: Improved phone number validation. Implement the function
