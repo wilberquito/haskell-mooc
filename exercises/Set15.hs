@@ -184,7 +184,18 @@ boolOrInt s = checkBool <|> checkInt
 --    ==> Errors ["Too long"]
 
 normalizePhone :: String -> Validation String
-normalizePhone = todo
+normalizePhone phoneNumber = 
+        checkLength nowsPhoneNumber
+        *> 
+        checkAllDigits nowsPhoneNumber 
+        *> 
+        pure nowsPhoneNumber
+    where
+        nowsPhoneNumber = nows phoneNumber
+        nows [] = []
+        nows (x : xs) = if isSpace x then nows xs else x : nows xs
+        checkAllDigits xs = traverse (\x -> check (isDigit x) ("Invalid character: " ++ [x]) xs) xs
+        checkLength xs = check (length xs <= 10) "Too long" xs
 
 ------------------------------------------------------------------------------
 -- Ex 9: Parsing expressions. The Expression type describes an
