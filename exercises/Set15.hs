@@ -276,11 +276,11 @@ data Priced a = Priced Int a
   deriving (Show, Eq)
 
 instance Functor Priced where
-  fmap = todo
+  fmap fn (Priced a b) = Priced a (fn b)
 
 instance Applicative Priced where
-  pure = todo
-  liftA2 = todo
+  pure = Priced 0 
+  liftA2 fn (Priced a b) (Priced c d) = Priced (a + c) (fn b d)
 
 ------------------------------------------------------------------------------
 -- Ex 11: This and the next exercise will use a copy of the
