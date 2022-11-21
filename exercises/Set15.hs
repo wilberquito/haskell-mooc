@@ -239,7 +239,19 @@ data Expression = Plus Arg Arg | Minus Arg Arg
   deriving (Show, Eq)
 
 parseExpression :: String -> Validation Expression
-parseExpression = todo
+parseExpression exp =
+    case words exp of
+        [arg1, op, arg2] -> checkOperator op <*> checkArg arg1 <*> checkArg arg2
+        _ -> invalid $ "Invalid expression: " ++ exp
+    where
+        checkOperator "+" = pure Plus
+        checkOperator "-" = pure Minus
+        checkOperator op = invalid $ "Unknown operator: " ++ op
+        checkArg arg = checkNumber arg <|> checkVariable arg
+        checkVariable var = check (length var == 1 && (isAlpha $ head var)) ("Invalid variable: " ++ var) (Variable $ head var)
+        checkNumber num = check (isNumber num) ("Invalid number: " ++ num) (Number $ read num)
+            where
+                isNumber str = isJust (readMaybe str :: Maybe Int)
 
 ------------------------------------------------------------------------------
 -- Ex 10: The Priced T type tracks a value of type T, and a price
