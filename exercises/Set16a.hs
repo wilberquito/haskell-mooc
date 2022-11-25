@@ -113,7 +113,9 @@ freq2 xs = map (\x -> (x,1)) xs
 --  +++ OK, passed 100 tests.
 
 outputInInput :: (Show a, Eq a) => [a] -> [(a,Int)] -> Property
-outputInInput input output = todo
+outputInInput input output = forAll (elements output) (`matches` input)
+    where
+        matches (x, n) input = (length $ filter (== x) input) == n
 
 -- This function passes the outputInInput test but not the others
 freq3 :: Eq a => [a] -> [(a,Int)]
@@ -142,7 +144,9 @@ freq3 (x:xs) = [(x,1 + length (filter (==x) xs))]
 --  +++ OK, passed 100 tests.
 
 frequenciesProp :: ([Char] -> [(Char,Int)]) -> NonEmptyList Char -> Property
-frequenciesProp freq input = todo
+frequenciesProp freq (NonEmpty input) = f (freq input)
+    where
+        f hz = sumIsLength input hz .&&. inputInOutput input hz .&&. outputInInput input hz 
 
 frequencies :: Eq a => [a] -> [(a,Int)]
 frequencies [] = []
@@ -173,7 +177,11 @@ frequencies (x:ys) = (x, length xs) : frequencies others
 --  [2,4,10]
 
 genList :: Gen [Int]
-genList = todo
+genList = 
+    do
+        len <- choose (3, 5) :: Gen Int
+        xxs <- vectorOf len (elements [0..10])
+        return $ sort xxs
 
 ------------------------------------------------------------------------------
 -- Ex 7: Here are the datatypes Arg and Expression from Set 15. Write
@@ -211,7 +219,10 @@ data Expression = Plus Arg Arg | Minus Arg Arg
   deriving (Show, Eq)
 
 instance Arbitrary Arg where
-  arbitrary = todo
+  arbitrary = oneof [genVar, genNum]
+    where
+        genVar = Variable <$> elements "abcxyz"
+        genNum = Number <$> elements [0..10] 
 
 instance Arbitrary Expression where
-  arbitrary = todo
+  arbitrary = elements [Plus, Minus] <*> arbitrary <*> arbitrary
