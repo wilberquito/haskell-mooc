@@ -309,15 +309,13 @@ multiApp f gs x = f $ map ($ x) gs
 -- function, the surprise won't work.
 
 interpreter :: [String] -> [String]
-interpreter commands = interpreter' commands [] (0, 0)
-
-interpreter' :: [String] -> [String] -> (Int, Int) -> [String]
-interpreter' [] ys _ = ys
-interpreter' (x : xs) ys (a, b) = case x of
-  "up" -> interpreter' xs ys (a, b + 1)
-  "down" -> interpreter' xs ys (a, b - 1)
-  "right" -> interpreter' xs ys (a + 1, b)
-  "left" -> interpreter' xs ys (a - 1, b)
-  "printX" -> show a : interpreter' xs ys (a, b)
-  _ -> show b : interpreter' xs ys (a, b)
-  
+interpreter commands = go 0 0 commands
+  where
+    go x y ("up" : commands) = go x (y + 1) commands
+    go x y ("down" : commands) = go x (y -1) commands
+    go x y ("left" : commands) = go (x -1) y commands
+    go x y ("right" : commands) = go (x + 1) y commands
+    go x y ("printX" : commands) = show x : go x y commands
+    go x y ("printY" : commands) = show y : go x y commands
+    go x y [] = []
+    go x y (_ : commands) = "BAD" : go x y commands
